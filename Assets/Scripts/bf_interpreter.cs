@@ -179,7 +179,7 @@ public class bf_interpreter : MonoBehaviour
                 int vertexIndex = tmp_inputfield.textComponent.textInfo.characterInfo[(int) currentChar].vertexIndex;
                 if (tmp_inputfield.textComponent.textInfo.characterInfo[(int) currentChar].isVisible)
                 {
-                    Color32 c0 = new Color32((byte) 0, (byte) 255, (byte) 0, 255);
+                    Color32 c0 = new Color32((byte) 255, (byte) 0, (byte) 0, 255);
                     newVertexColors[vertexIndex + 0] = c0;
                     newVertexColors[vertexIndex + 1] = c0;
                     newVertexColors[vertexIndex + 2] = c0;
