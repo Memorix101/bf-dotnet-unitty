@@ -19,6 +19,8 @@ public class bf_interpreter : MonoBehaviour
     private float speed = 10f;
     public Slider slider;
     public Text slider_speed;
+    private float currentChar = -1;
+    private int last = -1;
 
     //bf-dotnet
     static byte[] register;
@@ -82,7 +84,6 @@ public class bf_interpreter : MonoBehaviour
         {
             PrintConsole($"{(char)register[reg_id]}");
         }
-
         //debug_print_cells();
     }
 
@@ -94,7 +95,6 @@ public class bf_interpreter : MonoBehaviour
         {
             PrintRegConsole($"[{r}]");
         }
-
         PrintRegConsole("\n");
         string spacer = "";
         for (int i = 0; i < register.Length; i++)
@@ -118,7 +118,6 @@ public class bf_interpreter : MonoBehaviour
         //PrintConsoleLine("\n" + spacer);
     }
 
-
     // Start is called before the first frame update
     void Start()
     {
@@ -132,15 +131,12 @@ public class bf_interpreter : MonoBehaviour
         slider_speed.text = $"{speed}";
     }
 
-
-    private float currentChar = -1;
-    private int last = -1;
     // Update is called once per frame
     void Update()
     {
         if (isRunning)
         {
-            slider.interactable = false;
+            //slider.interactable = false;
             /*start_btn.interactable = false;
             stop_btn.interactable = true;*/
             tmp_inputfield.interactable = false;
@@ -153,22 +149,20 @@ public class bf_interpreter : MonoBehaviour
                 //step_btn.interactable = true;
             }
 
-            if (currentChar > code.Length)
+            if (currentChar >= code.Length)
             {
                 isRunning = false;
-                currentChar = -1;
-                last = -1;
+                reset_interpreter();
+                Debug.Log("End of code.");
             }
             else
             {
                 Debug.Log($"{register[0]} - {register[1]}");
                 if (last != (int) currentChar)
                 {
-                    Interpreter((int) currentChar);
+                    interpreter((int) currentChar);
                 }
-
                 last = (int) currentChar;
-
                 //debug_print_cells();
                 tmp_inputfield.textComponent.ForceMeshUpdate();
                 // Get the index of the material used by the current character.
@@ -191,17 +185,17 @@ public class bf_interpreter : MonoBehaviour
         else
         {
             code = tmp_inputfield.text;
-            speed = (int)slider.value;
-            slider_speed.text = $"{speed}";
-            slider.interactable = true;
+            //slider.interactable = true;
             tmp_inputfield.interactable = true;
             /*start_btn.interactable = true;
             step_btn.interactable = true;
             stop_btn.interactable = false;*/
         }
+        speed = (int)slider.value;
+        slider_speed.text = $"{speed}";
     }
 
-    void Interpreter(int i)
+    void interpreter(int i)
     {
         //for (int i = 0; i < code.Length; i++)
         //{
@@ -240,7 +234,6 @@ public class bf_interpreter : MonoBehaviour
                     {
                         Array.Resize<int>(ref loop_ptr, loop_ptr.Length + 1);
                     }
-
                     loop_id++;
                     loop_ptr[loop_id] = i;
                 }
@@ -275,22 +268,25 @@ public class bf_interpreter : MonoBehaviour
         debug_print_cells();
     }
 
-    public void RunCode()
+    void reset_interpreter()
     {
-        //reset
-        register = new byte[8];
-        loop_ptr = new int[8];
+        Array.Clear(register, 0, register.Length);
+        Array.Clear(loop_ptr, 0, register.Length);
         reg_id = 0;
         loop_id = -1;
         skip_forward = false;
         skip_id = 0;
-
+        currentChar = -1;
+        last = -1;
         tmp_console.text = string.Empty;
+    }
+
+    public void RunCode()
+    {
+        reset_interpreter();
         isRunning = true;
         isStepping = false;
-        currentChar = -1;
         //PrintConsoleLine("bf-dotnet-core v0.9 - Copyright (c) 2021 Memorix101\n");
-        //Interpreter(0);
     }
 
     public void StepBtn()
@@ -299,10 +295,17 @@ public class bf_interpreter : MonoBehaviour
         isRunning = true;
         isStepping = true;
         currentChar++;
+        // TODO reset at end of code
     }
 
     public void StopBtn()
     {
         isRunning = false;
+    }
+
+    public void ContinueBtn()
+    {
+        isRunning = true;
+        isStepping = false;
     }
 }
